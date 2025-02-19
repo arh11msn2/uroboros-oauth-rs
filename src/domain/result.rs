@@ -24,9 +24,7 @@ impl Default for UroborosError {
 
 impl IntoResponse for UroborosError {
     fn into_response(self) -> Response {
-        match self.kind {
-            _ => (StatusCode::INTERNAL_SERVER_ERROR, self.message).into_response(),
-        }
+        (StatusCode::INTERNAL_SERVER_ERROR, self.message).into_response()
     }
 }
 

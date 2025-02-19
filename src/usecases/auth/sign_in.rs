@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::{
-    adapters::postgres::entities::uroboros_user_pg,
+    adapters::postgres::entities::user_pg,
     apps::server::state::UroborosOauthState,
     domain::{
         jwt::{encode_jwt, JwtClaims},
@@ -26,9 +26,7 @@ pub struct SignInByLoginOptions {
 pub async fn sign_in_by_login(
     state: Arc<UroborosOauthState>,
     options: SignInByLoginOptions,
-) -> Option<(String, uroboros_user_pg::Model)> {
-    //let pg = &state.postgres;
-
+) -> Option<(String, user_pg::Model)> {
     let optional_user_by_login = get_user_and_auth_data_by_login(
         state.clone(),
         GetUserAndAuthDataByLoginOptions {
@@ -41,7 +39,9 @@ pub async fn sign_in_by_login(
         None => None,
         Some((user, auth_data)) => {
             let password = salt_password(&options.password, &auth_data.salt);
-            if password == auth_data.pass {
+            let expected_pass = auth_data.pass;
+
+            if Some(password) == expected_pass {
                 match encode_jwt(
                     JwtClaims {
                         uid: user.id.to_string(),

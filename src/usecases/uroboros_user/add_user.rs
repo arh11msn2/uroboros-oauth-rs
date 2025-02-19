@@ -3,7 +3,7 @@ use std::sync::Arc;
 use utoipa::ToSchema;
 
 use crate::{
-    adapters::postgres::entities::uroboros_user_pg,
+    adapters::postgres::entities::user_pg,
     apps::server::state::UroborosOauthState,
     domain::{
         result::{UroborosError, UroborosErrorKind, UroborosResult},
@@ -22,8 +22,8 @@ pub struct AddUserOptions {
 pub async fn add_user(
     state: Arc<UroborosOauthState>,
     options: AddUserOptions,
-) -> UroborosResult<uroboros_user_pg::Model> {
-    let mut user_to_add = uroboros_user_pg::ActiveModel {
+) -> UroborosResult<user_pg::Model> {
+    let mut user_to_add = user_pg::ActiveModel {
         role: Set(options.role),
         first_name: Set(options.first_name.to_string()),
         last_name: Set(options.last_name.to_string()),

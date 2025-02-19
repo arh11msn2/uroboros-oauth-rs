@@ -20,7 +20,6 @@ use utoipa::ToSchema;
     rename_all = "PascalCase"
 )]
 pub enum UroborosUserRole {
-    Superadmin,
     Admin,
     Moderator,
     User,

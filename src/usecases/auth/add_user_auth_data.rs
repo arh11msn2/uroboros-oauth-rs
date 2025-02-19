@@ -3,7 +3,7 @@ use std::sync::Arc;
 use utoipa::ToSchema;
 
 use crate::{
-    adapters::postgres::entities::uroboros_user_auth_data_pg,
+    adapters::postgres::entities::user_auth_data_pg,
     apps::server::state::UroborosOauthState,
     domain::password::{generate_salt, salt_password},
 };
@@ -12,7 +12,7 @@ use crate::{
 pub struct AddUserAuthDataOptions {
     pub user_id: String,
     pub login: String,
-    pub pass: String,
+    pub pass: Option<String>,
     pub salt: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
@@ -21,19 +21,11 @@ pub struct AddUserAuthDataOptions {
 pub async fn add_user_auth_data(
     state: Arc<UroborosOauthState>,
     options: AddUserAuthDataOptions,
-) -> Option<uroboros_user_auth_data_pg::Model> {
+) -> Option<user_auth_data_pg::Model> {
     let salt = generate_salt();
-    let pass = salt_password(&options.pass, &salt);
+    let pass = options.pass.map(|password| salt_password(&password, &salt));
 
-    println!("OKOK");
-    println!("{:?}", options);
-    println!("{:?}", &options.user_id);
-    println!(
-        "{:?}",
-        Uuid::parse_str(&options.user_id).unwrap_or_default()
-    );
-
-    let auth_data_to_add = uroboros_user_auth_data_pg::ActiveModel {
+    let auth_data_to_add = user_auth_data_pg::ActiveModel {
         user_id: sea_orm::ActiveValue::Set(Uuid::parse_str(&options.user_id).unwrap_or_default()),
         login: sea_orm::ActiveValue::Set(options.login),
         pass: sea_orm::ActiveValue::Set(pass),

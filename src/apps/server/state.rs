@@ -5,20 +5,20 @@ use sea_orm::prelude::Uuid;
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 
 #[derive(Clone, Debug, Default)]
-pub struct UroborosOauthSuperadminOptions {
+pub struct UroborosOauthDefaultAdminOptions {
     pub login: String,
     pub password: String,
 }
 
-impl UroborosOauthSuperadminOptions {
+impl UroborosOauthDefaultAdminOptions {
     pub fn from_env() -> Option<Self> {
-        env::var("UROBOROS_SUPERADMIN_LOGIN")
-            .ok()
-            .map(|login| UroborosOauthSuperadminOptions {
+        env::var("UROBOROS_DEFAULT_ADMIN_LOGIN").ok().map(|login| {
+            UroborosOauthDefaultAdminOptions {
                 login,
-                password: env::var("UROBOROS_SUPERADMIN_PASSWORD")
+                password: env::var("UROBOROS_DEFAULT_ADMIN_PASSWORD")
                     .unwrap_or(Uuid::default().to_string()),
-            })
+            }
+        })
     }
 }
 
@@ -48,7 +48,7 @@ impl UroborosOauthSeverOptions {
 pub struct UroborosOauthState {
     pub postgres: DatabaseConnection,
     pub server_options: UroborosOauthSeverOptions,
-    pub superadmin_options: Option<UroborosOauthSuperadminOptions>,
+    pub default_admin_options: Option<UroborosOauthDefaultAdminOptions>,
 }
 
 impl UroborosOauthState {
@@ -74,7 +74,7 @@ impl UroborosOauthState {
         Self {
             postgres,
             server_options: UroborosOauthSeverOptions::from_env(),
-            superadmin_options: UroborosOauthSuperadminOptions::from_env(),
+            default_admin_options: UroborosOauthDefaultAdminOptions::from_env(),
         }
     }
 }

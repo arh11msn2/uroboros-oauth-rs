@@ -23,7 +23,7 @@ where
                 Err(())
             }
             Ok(TypedHeader(Authorization(bearer))) => {
-                match decode_jwt(bearer.token(), "secret11".as_ref()) {
+                match decode_jwt(bearer.token(), "secret11") {
                     Err(err) => {
                         println!("decode_jwt.Error: {:?}", err);
                         Err(())

@@ -15,6 +15,7 @@ axum-extra = { version = "^0.9.6", features = ["typed-header"] }
 axum-test = "=14.2.2"
 chrono = "0.4.39"
 dotenv = "0.15.0"
+fake = { version = "3.0.1", features = ["derive"] }
 jsonwebtoken = "9.3.0"
 pbkdf2 = "0.12.2"
 rand = "0.8.5"

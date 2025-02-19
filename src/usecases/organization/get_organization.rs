@@ -1,10 +1,11 @@
+use anyhow::Context;
 use sea_orm::{prelude::*, QuerySelect};
 use std::sync::Arc;
 
 use crate::{
     adapters::postgres::entities::{organization_member_pg, organization_pg},
     apps::server::state::UroborosOauthState,
-    domain::result::{UroborosError, UroborosErrorKind, UroborosResult},
+    domain::result::{UroborosError, UroborosErrorKind},
     usecases::uroboros_user::get_user::{get_actor_by_id, GetActorByIdOptions},
 };
 
@@ -17,9 +18,8 @@ pub struct GetOrganizationPageByUserOptions {
 pub async fn get_organization_page_by_user(
     state: Arc<UroborosOauthState>,
     options: GetOrganizationPageByUserOptions,
-) -> UroborosResult<Vec<organization_pg::Model>> {
-    println!("options {:?}", options);
-    let actor = get_actor_by_id(
+) -> anyhow::Result<Vec<organization_pg::Model>> {
+    let _actor = get_actor_by_id(
         state.clone(),
         GetActorByIdOptions {
             actor_id: options.actor_id,
@@ -35,13 +35,7 @@ pub async fn get_organization_page_by_user(
         .offset(offset)
         .all(&state.postgres)
         .await
-        .map_err(|err| {
-            println!("err {:?}", err);
-            UroborosError {
-                kind: UroborosErrorKind::CannotGet,
-                message: "Cannot get organizations page".to_string(),
-            }
-        })
+        .context("Cannot get organizations page")
 }
 
 #[derive(Debug, Default)]
@@ -53,8 +47,6 @@ pub async fn get_one_organization_by_id(
     state: Arc<UroborosOauthState>,
     options: GetOneOrganizationByIdOptions,
 ) -> anyhow::Result<(organization_pg::Model, Vec<organization_member_pg::Model>)> {
-    println!("get_one_organization_by_id.options {:?}", options);
-
     let o_organization = organization_pg::Entity::find_by_id(options.organization_id)
         .find_with_related(organization_member_pg::Entity)
         .all(&state.postgres)
@@ -67,7 +59,18 @@ pub async fn get_one_organization_by_id(
             }
         })?
         .first()
-        .map(|organization| organization.clone());
+        .cloned();
 
     o_organization.ok_or(anyhow::anyhow!("Organization not found by id"))
+}
+
+pub async fn get_organization_members_by_id(
+    state: Arc<UroborosOauthState>,
+    options: GetOneOrganizationByIdOptions,
+) -> anyhow::Result<Vec<organization_member_pg::Model>> {
+    organization_member_pg::Entity::find()
+        .filter(organization_member_pg::Column::OrganizationId.eq(options.organization_id))
+        .all(&state.postgres)
+        .await
+        .context("Cannot get organization members")
 }

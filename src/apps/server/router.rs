@@ -21,9 +21,10 @@ use crate::apps::server::state::UroborosOauthState;
         get_index_route,
         get_organization_page_route, add_organization_route,
         get_one_organization_by_id_route,
-        add_one_organization_member_route,
-        sign_in_route,
+        add_one_organization_member_route, get_one_organization_members_list_route,
+        sign_in_route, set_user_password_route,
         add_uroborus_user_route, get_uroborus_users_list_route,
+        get_current_user_route, get_one_user_by_id_route,
     ),
     modifiers(&SecurityAddon)
 )]
@@ -49,6 +50,8 @@ impl Modify for SecurityAddon {
 pub fn create_router(state: Arc<UroborosOauthState>) -> Router<()> {
     Router::new()
         .route("/", get(get_index_route))
+        .route("/auth/sign-in", post(sign_in_route))
+        .route("/auth/password", post(set_user_password_route))
         .route(
             "/organization",
             get(get_organization_page_route).post(add_organization_route),
@@ -59,13 +62,14 @@ pub fn create_router(state: Arc<UroborosOauthState>) -> Router<()> {
         )
         .route(
             "/organization/:organization_id/member",
-            post(add_one_organization_member_route),
+            get(get_one_organization_members_list_route).post(add_one_organization_member_route),
         )
-        .route("/sign-in", post(sign_in_route))
         .route(
             "/user",
             get(get_uroborus_users_list_route).post(add_uroborus_user_route),
         )
+        .route("/user/me", get(get_current_user_route))
+        .route("/user/:user_id", get(get_one_user_by_id_route))
         .merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
         .with_state(state)
 }

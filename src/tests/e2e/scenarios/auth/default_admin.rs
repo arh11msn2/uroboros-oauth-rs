@@ -1,28 +1,28 @@
 use crate::{
-    apps::server::routes::auth::TokenResponse,
+    apps::server::dtos::response::auth::TokenResponse,
     tests::e2e::core::test_server::get_test_server_and_state,
     usecases::auth::sign_in::SignInByLoginOptions,
 };
 
 #[tokio::test]
-async fn it_should_login_as_superadmin() {
+async fn it_should_login_as_default_admin() {
     let (test_server, state) = get_test_server_and_state().await;
 
     assert!(
-        state.clone().superadmin_options.is_some(),
-        "there is no superadmin options"
+        state.clone().default_admin_options.is_some(),
+        "there is no default_admin options"
     );
 
-    let superadmin_options = state.superadmin_options.as_ref().unwrap().clone();
+    let default_admin_options = state.default_admin_options.as_ref().unwrap().clone();
 
-    assert_ne!(superadmin_options.login.len(), 0);
-    assert_ne!(superadmin_options.password.len(), 0);
+    assert_ne!(default_admin_options.login.len(), 0);
+    assert_ne!(default_admin_options.password.len(), 0);
 
     let response = test_server
-        .post("/sign-in")
+        .post("/auth/sign-in")
         .json(&SignInByLoginOptions {
-            login: superadmin_options.login.clone(),
-            password: superadmin_options.password.clone(),
+            login: default_admin_options.login.clone(),
+            password: default_admin_options.password.clone(),
         })
         .await;
 

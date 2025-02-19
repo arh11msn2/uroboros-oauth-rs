@@ -8,8 +8,8 @@ pub struct Model {
     pub id: Uuid,
     pub user_id: Uuid,
     pub login: String,
-    pub pass: String,
     pub salt: String,
+    pub pass: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
     pub created_at: DateTime,
@@ -17,11 +17,11 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_one = "super::uroboros_user_pg::Entity")]
+    #[sea_orm(has_one = "super::user_pg::Entity")]
     User,
 }
 
-impl Related<super::uroboros_user_pg::Entity> for Entity {
+impl Related<super::user_pg::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::User.def()
     }
